@@ -225,11 +225,20 @@ public class Recursive {
 	private static void drawSquares(Graphics g, int size, int limit, double x, double y) {
 
 		if (size > limit) {
-			// top
 
-			// middle
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
 
-			// bottom
+					boolean isCenter = (i == 1 && j == 1);
+					if (!isCenter) {
+
+						drawSquares(g, size / 3, limit, x + size/3 * i, y + size/3 * j);
+					} else {
+						g.fillRect((int) (x + (size / 3)) , (int) (y + (size / 3)), size / 3, size / 3);
+					}
+					
+				}
+			}
 		}
 	}
 
@@ -253,36 +262,28 @@ public class Recursive {
 			throw new IllegalArgumentException("Failed precondition: " + "canFlowOffMap");
 		}
 
+		final int[][] directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
 		if (row == 0 || col == 0 || row == map.length - 1 || col == map[0].length - 1) {
 			return true;
 		} else {
+			// we are not at the end.
+			boolean result = false;
+			// get new Col and new Row
+			for (int i = 0; i < directions.length; i++) {
+				int newCol = col + directions[i][1];
+				int newRow = row + directions[i][0];
 
-			// 4 directions
-
-			if (map[row + 1][col] < map[row][col]) {
-
-				return canFlowOffMap(map, row + 1, col);
-			}
-
-			else if (map[row - 1][col] < map[row][col]) {
-
-				return canFlowOffMap(map, row - 1, col);
-			}
-
-			else if (map[row][col + 1] < map[row][col]) {
-
-				return canFlowOffMap(map, row, col + 1);
+				// at new Col and new Row check
+				if (map[newRow][newCol] < map[row][col] && !result) {
+					result = canFlowOffMap(map, newRow, newCol);
+					if (result) {
+						return result;
+					}
+				}
 
 			}
-
-			else if (map[row][col - 1] < map[row][col]) {
-
-				return canFlowOffMap(map, row, col - 1);
-			}
-
-			else {
-				return false;
-			}
+			return result;
 
 		}
 
@@ -336,8 +337,25 @@ public class Recursive {
 	 *         The return value will be greater than or equal to 0.
 	 */
 	public static int minDifference(int numTeams, int[] abilities) {
-		return -1;
+
+		// check preconditions
+		if (numTeams < 2 || abilities == null || abilities.length < numTeams) {
+			throw new IllegalArgumentException("Cannot duthat");
+		}
+
+		return 0;
+		// base case
+
+//		int index = 0;
+//		int min = minDiffHelper (numTeams, abilities, index);
+//		
+//		return min;
 	}
+
+//	private static int minDiffHelper (int numTeams, int[] abilities, int index) {
+//		
+//		
+//	}
 
 	/**
 	 * Problem 8: Maze solver. <br>
@@ -353,14 +371,16 @@ public class Recursive {
 	 * 
 	 * @param rawMaze represents the maze we want to escape. rawMaze is not altered
 	 *                as a result of this method.
+	 * 
+	 *                //make copy and pass in
 	 * @return per the post condition
 	 */
+
 	public static int canEscapeMaze(char[][] rawMaze) {
 
 		checkPreconditions(rawMaze);
-		
+
 		return 0;
-		
 
 	}
 
@@ -368,8 +388,6 @@ public class Recursive {
 		if (board == null || board[0].length == board.length) {
 			throw new IllegalArgumentException("violation of preconditions");
 		}
-		
-		
 
 		String correctChars = "SE$GY*";
 		int sCounter = 0;
