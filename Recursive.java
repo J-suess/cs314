@@ -453,7 +453,7 @@ public class Recursive {
 
 	private static int mazeHelper(char[][]hardMaze, int maxCoin, int startingRow, int startingCol, int coins) {
 		
-		//mazeHelper function 
+		//base case - found exit! 
 		if (hardMaze[startingRow][startingCol] == 'E') {
 			if (coins == maxCoin) {
 				return 2;
@@ -466,6 +466,7 @@ public class Recursive {
 			final int[][] directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 			char backtrack = hardMaze[startingRow][startingCol];
 			
+			//update the current cell depending on its current value 
 				if (backtrack == '$') {
 					hardMaze[startingRow][startingCol] = 'Y';
 				} else if (backtrack == 'Y') {
@@ -484,10 +485,14 @@ public class Recursive {
 					if (newCol < hardMaze[0].length && newRow < hardMaze.length && newCol >= 0 && newRow >= 0) {
 						int coinsToAdd = hardMaze[newRow][newCol] == '$' ? 1 : 0;
 						if (backtrack != '*') {
+							//update recursive case if the current cell is passable 
 							int result = mazeHelper(hardMaze, maxCoin, newRow, newCol, coins + coinsToAdd);
 							
+							//return immidiately if found escape w/ coins 
 							if (result == 2) {
 								return 2;
+								
+							//if found exit, store! 
 							} else if (result == 1) {
 								foundExit = true;
 							}
@@ -501,10 +506,12 @@ public class Recursive {
 				//backtrack!! 
 				hardMaze[startingRow][startingCol] = backtrack; 
 				
+				//return if found exit w/o the coins 
 				if (foundExit) {
 					return 1;
 				}
 				
+				//found nothing :( 
 				return 0;
 
 		}
