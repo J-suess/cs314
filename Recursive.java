@@ -23,6 +23,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -232,11 +233,11 @@ public class Recursive {
 					boolean isCenter = (i == 1 && j == 1);
 					if (!isCenter) {
 
-						drawSquares(g, size / 3, limit, x + size/3 * i, y + size/3 * j);
+						drawSquares(g, size / 3, limit, x + size / 3 * i, y + size / 3 * j);
 					} else {
-						g.fillRect((int) (x + (size / 3)) , (int) (y + (size / 3)), size / 3, size / 3);
+						g.fillRect((int) (x + (size / 3)), (int) (y + (size / 3)), size / 3, size / 3);
 					}
-					
+
 				}
 			}
 		}
@@ -343,19 +344,63 @@ public class Recursive {
 			throw new IllegalArgumentException("Cannot duthat");
 		}
 
-		return 0;
-		// base case
-
-//		int index = 0;
-//		int min = minDiffHelper (numTeams, abilities, index);
-//		
-//		return min;
+		int currentPerson = 0;
+		int[] assignTeams = new int[numTeams];
+		int[] assignAbilities = new int[numTeams];
+		return minDifHelper(numTeams, abilities, assignTeams, assignAbilities, currentPerson);
 	}
 
-//	private static int minDiffHelper (int numTeams, int[] abilities, int index) {
-//		
-//		
-//	}
+	private static int minDifHelper(int numTeams, int[] abilities, int[] assignTeams, int[] assignAbilities,
+			int currentPerson) {
+
+		// base case
+		if (currentPerson == abilities.length) {
+			int min = assignAbilities[0];
+			int max = assignAbilities[0];
+			for (int i = 0; i < assignTeams.length; i++) {
+				if (assignTeams[i] == 0) {
+					return Integer.MAX_VALUE;
+				}
+
+				if (assignAbilities[i] < min) {
+					min = assignAbilities[i];
+				}
+
+				if (assignAbilities[i] > max) {
+					max = assignAbilities[i];
+				}
+
+			}
+
+			// assume teams are valid!
+			return max - min;
+			
+		} else {
+			
+			int minDiff = Integer.MAX_VALUE;
+		
+			// recursive case if not base case
+			for (int i = 0; i < assignTeams.length; i++) {
+				assignTeams[i]++;
+				assignAbilities[i] += abilities[currentPerson];
+				
+				int newDiff = minDifHelper(numTeams, abilities, 
+						assignTeams, assignAbilities, currentPerson + 1);
+				
+				minDiff = Math.min(minDiff, newDiff);
+				
+				//backtrack and explore other options 
+				assignTeams[i]--;
+				assignAbilities[i] -= abilities[currentPerson];
+				
+				
+			}
+			
+			return minDiff;
+
+		}
+
+	}
 
 	/**
 	 * Problem 8: Maze solver. <br>
@@ -378,12 +423,93 @@ public class Recursive {
 
 	public static int canEscapeMaze(char[][] rawMaze) {
 
-		checkPreconditions(rawMaze);
-
-		return 0;
-
+//		checkPreconditions(rawMaze);
+		
+		char[][] hardMaze = Arrays.copyOf(rawMaze, rawMaze.length);
+		final int[][] directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		
+		int startingRow = 0;
+		int startingCol = 0;
+		int maxCoin = 0;
+		for (int i = 0; i < hardMaze.length; i++) {
+			for (int j = 0; j < hardMaze[0].length; j++) {
+				if (hardMaze[i][j] == 'S') {
+					startingRow = i;
+					startingCol = j;
+				}
+				
+				if (hardMaze[i][j] == '$') {
+					maxCoin++;
+				}
+			}
+		}
+		
+		int index = 0;
+		
+		int canEscape = mazeHelper(hardMaze, maxCoin, startingRow, startingCol, 0);
+		
+		return canEscape;
 	}
 
+	private static int mazeHelper(char[][]hardMaze, int maxCoin, int startingRow, int startingCol, int coins) {
+		
+		//mazeHelper function 
+		if (hardMaze[startingRow][startingCol] == 'E') {
+			if (coins == maxCoin) {
+				return 2;
+			} else {
+				return 1;
+			}
+			
+		} else {
+			//recursive call 
+			final int[][] directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+			char backtrack = hardMaze[startingRow][startingCol];
+			
+				if (backtrack == '$') {
+					hardMaze[startingRow][startingCol] = 'Y';
+				} else if (backtrack == 'Y') {
+					hardMaze[startingRow][startingCol] = '*';
+				} else if (backtrack == 'G') {
+					hardMaze[startingRow][startingCol] = 'Y';
+				}
+				boolean foundExit = false;
+				// get new Col and new Row
+				for (int i = 0; i < directions.length; i++) {
+					int newCol = startingCol + directions[i][1];
+					int newRow = startingRow + directions[i][0];
+
+					
+					//check if bounds are valid 
+					if (newCol < hardMaze[0].length && newRow < hardMaze.length && newCol >= 0 && newRow >= 0) {
+						int coinsToAdd = hardMaze[newRow][newCol] == '$' ? 1 : 0;
+						if (backtrack != '*') {
+							int result = mazeHelper(hardMaze, maxCoin, newRow, newCol, coins + coinsToAdd);
+							
+							if (result == 2) {
+								return 2;
+							} else if (result == 1) {
+								foundExit = true;
+							}
+						}
+						
+						
+					}
+			
+			}
+				
+				//backtrack!! 
+				hardMaze[startingRow][startingCol] = backtrack; 
+				
+				if (foundExit) {
+					return 1;
+				}
+				
+				return 0;
+
+		}
+		
+	}
 	private static void checkPreconditions(char[][] board) {
 		if (board == null || board[0].length == board.length) {
 			throw new IllegalArgumentException("violation of preconditions");
